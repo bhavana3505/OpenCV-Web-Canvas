@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>OpenCV Video Processing</title>
+    <script async src="opencv.js" onload="opencvReady()" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet">
+  <!--Add Fonts-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@100;200;300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0px;
+    box-sizing:border-box;
+}
+body{
+    background-color:white;
+}
+.main-page{
+    height:100vh;
+    display:flex;
+}
+.side-line{
+    background-color:rgb(7, 199, 247);
+    height:100%;
+    width:25px;
+
+}
+.side-bar{
+    background-color:white;
+    height:100%;
+    width:15%;
+    display:flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    box-shadow:1px 1px 10px rgb(185,185,185);
+}
+.right-panel{
+    display: flex;
+    flex-direction: column;
+    height:100%;
+    width:100%;
+}
+.header{
+    height:8%;
+    width:100%;
+    background-color:rgb(0, 225, 255);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 18%;
+    padding-left:10%;
+    box-shadow: 1px 1px 1px rgb(185,185,185);
+}
+.circle{
+    height:70px;
+    width:70px;
+    background-color: rgb(184, 176, 176);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius:50%;
+
+}
+.circle:hover{
+    background-color: rgb(75, 73, 73);
+}
+.circle:active{
+    background-color: rgb(8, 206, 241);;
+}
+.blue-circle{
+    background-color: rgb(8, 206, 241);;
+}
+h1{
+    font-family: 'Dancing Script', cursive;
+    color:white;
+}
+.table-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* Center the content horizontally */
+}
+#tablet-image {
+    position:absolute;
+}
+
+#canvas_output1,#canvas_output2,#canvas_output3,#canvas_output4{
+    width: 100%;
+    max-width: 606px;
+    max-height: 460px;
+}
+
+</style>
+</head>
+<body>
+    <div class="main-page">
+        <!--Side panel-->
+        <div class="side-line"></div>
+        <!-- Side bar-->
+        <div class="side-bar">
+            <span class="circle" id="button-rgb">
+                <i class="material-icons"style="font-size:36px;color:white;">palette</i>
+            </span>
+            <span class="circle" id="button-gray">
+                <i class="material-icons"style="font-size:36px;color:white;">contrast</i>
+            </span>
+            <span class="circle" id="button-blur">
+                <i class="material-icons"style="font-size:36px;color:white;">blur_on</i>
+            </span>
+            <span class="circle" id="button-edge">
+                <i class="material-icons"style="font-size:36px;color:white;">grade</i>
+            </span>
+            <span class="circle" id="button-combine">
+                <i class="material-icons"style="font-size:36px;color:white;">grade</i>
+            </span>
+            <span class="circle blue-circle" id="button-click">
+                <i class="material-icons"style="font-size:36px;color:white;">videocam</i>
+            </span>
+            
+        </div>
+        <div class="right-panel">
+            <!-- Header -->
+            <div class="header">
+                <div class="empty"></div>
+                <h1>Photo Shop</h1>
+                <div class="logo-container" style="color:white;font-size:30px;">CV WEB</div>
+            </div>
+            <!-- Table container-->
+            
+            <div class="table-container">
+                <img id="tablet-image" src="../templates/canvas.png" width="1050" height="780" alt="">
+                <video height="460" width="606" id="cam_input" style="display:block"></video>
+                <canvas id="canvas_output1" style="display:none"></canvas>
+                <canvas id="canvas_output2" style="display:none"></canvas>
+                <canvas id="canvas_output3" style="display:none"></canvas>
+                <canvas id="canvas_output4" style="display:none"></canvas>
+                <canvas id="canvas_output5" style="display:none"></canvas>
+
+                <img id="image-main" src="images/download.jpeg" style="display:none;">
+            </div>
+                
+        </div>
+        <!--Right panel-->
+    
+    
+    <script>
+        function opencvReady()
+        {
+            cv['onRuntimeInitialized']=()=>{
+                let video=document.getElementById('cam_input');
+                navigator.mediaDevices.getUserMedia({video:true,audio:false})
+                .then(function(stream){
+                    video.srcObject=stream;
+                    video.play();
+                }).catch(function(err){
+                    console.log("An error  occured!"+err);
+                });
+                let cap=new cv.VideoCapture(cam_input);
+                const FPS=24;
+                let canvas1=document.getElementById('canvas_output1');
+                let canvas2=document.getElementById('canvas_output2');
+                let canvas3=document.getElementById('canvas_output3');
+                let canvas4=document.getElementById('canvas_output4');
+                let canvas5=document.getElementById('canvas_output5');
+
+                document.getElementById("button-rgb").onclick=function()
+                {
+                    
+                    let src=new cv.Mat(video.height,video.width,cv.CV_8UC4);
+                    video.style.display='none';
+                    canvas1.style.display='block';
+                    canvas2.style.display='none';
+                    canvas3.style.display='none';
+                    canvas4.style.display='none';
+                    canvas5.style.display='none';
+                    function processVideo(){
+                    let begin =Date.now();
+                    cap.read(src);
+                    cv.imshow('canvas_output1',src); 
+                    document.getElementById("button-click").onclick=function()
+                    {
+                        
+                        let quality = 1;
+                         // Get the data URL with the specified quality
+                        let dataUrl = canvas1.toDataURL('image/jpeg', quality);
+
+                        // Create a link and trigger a download
+                        let a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download='opencv.jpeg';
+                        a.click();
+                    };
+                    let delay=1000/FPS-(Date.now()-begin);
+                    setTimeout(processVideo,delay);
+                }
+                setTimeout(processVideo,0);
+                };
+
+                document.getElementById("button-gray").onclick=function(){
+                    let src=new cv.Mat(video.height,video.width,cv.CV_8UC4);
+                    let gray=new cv.Mat();
+                    video.style.display='none';
+                    canvas1.style.display='none';
+                    canvas2.style.display='block';
+                    canvas3.style.display='none';
+                    canvas4.style.display='none';
+                    canvas5.style.display='none';
+                    function processVideo1(){
+                    let begin =Date.now();
+                    cap.read(src);
+                    cv.cvtColor(src,gray,cv.COLOR_RGB2GRAY,0);
+                    cv.imshow('canvas_output2',gray);
+                    document.getElementById("button-click").onclick=function()
+                    {
+                        
+                        let quality = 1;
+                         // Get the data URL with the specified quality
+                        let dataUrl = canvas2.toDataURL('image/jpeg', quality);
+
+                        // Create a link and trigger a download
+                        let a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download='opencv.jpeg';
+                        a.click();
+                    };
+                    let delay=1000/FPS-(Date.now()-begin);
+                    setTimeout(processVideo1,delay);
+                }
+                setTimeout(processVideo1,0); 
+                };
+                //----- BLUR BUTTON-----
+                document.getElementById("button-blur").onclick=function(){
+                    let src=new cv.Mat(video.height,video.width,cv.CV_8UC4);
+                    let blur=new cv.Mat();
+                    video.style.display='none';
+                    canvas1.style.display='none';
+                    canvas2.style.display='none';
+                    canvas3.style.display='block';
+                    canvas4.style.display='none';
+                    canvas5.style.display='none';
+                    function processVideo2(){
+                    let begin =Date.now();
+                    cap.read(src);
+                    let ksize=new cv.Size(13,13);
+                    cv.GaussianBlur(src,blur,ksize,0);
+                    cv.imshow('canvas_output3',blur); 
+                    document.getElementById("button-click").onclick=function()
+                    {
+                        
+                        let quality = 1;
+                         // Get the data URL with the specified quality
+                        let dataUrl = canvas3.toDataURL('image/jpeg', quality);
+
+                        // Create a link and trigger a download
+                        let a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download='opencv.jpeg';
+                        a.click();
+                    };
+                    let delay=1000/FPS-(Date.now()-begin);
+                    setTimeout(processVideo2,delay);
+                }
+                setTimeout(processVideo2,0); 
+
+                };
+                // ------ EDGE BUTTON -------
+                document.getElementById("button-edge").onclick=function(){
+                    let src=new cv.Mat(video.height,video.width,cv.CV_8UC4);
+                    let canny=new cv.Mat();
+                    let gray=new cv.Mat();
+                    video.style.display='none';
+                    canvas1.style.display='none';
+                    canvas2.style.display='none';
+                    canvas3.style.display='none';
+                    canvas4.style.display='block';
+                    canvas5.style.display='none';
+                    function processVideo3(){
+                    let begin =Date.now();
+                    cap.read(src);
+                    //cv.Canny(src,canny,100,100);
+
+                    cv.cvtColor(src,gray,cv.COLOR_RGB2GRAY,0);
+                    cv.adaptiveThreshold(gray,canny,250,cv.ADAPTIVE_THRESH_MEAN_C,
+                             cv.THRESH_BINARY,9,5);
+
+                    cv.imshow('canvas_output4',canny); 
+
+                    document.getElementById("button-click").onclick=function()
+                    {
+                        
+                        let quality = 1;
+                         // Get the data URL with the specified quality
+                        let dataUrl = canvas4.toDataURL('image/jpeg', quality);
+
+                        // Create a link and trigger a download
+                        let a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download='opencv.jpeg';
+                        a.click();
+                    };
+                    let delay=1000/FPS-(Date.now()-begin);
+                    setTimeout(processVideo3,delay);
+                }
+                setTimeout(processVideo3,0); 
+                };    
+
+
+                document.getElementById("button-combine").onclick=function(){
+                    let src=new cv.Mat(video.height,video.width,cv.CV_8UC4);
+                    let img1=cv.imread("image-main");
+                    let combine=new cv.Mat();
+                    video.style.display='none';
+                    canvas1.style.display='none';
+                    canvas2.style.display='none';
+                    canvas3.style.display='none';
+                    canvas4.style.display='none';
+                    canvas5.style.display='block';
+                    function processVideo4(){
+                    let begin =Date.now();
+                    cap.read(src);
+                    let resizedImg = new cv.Mat();
+                    let resizedSrc = new cv.Mat();
+                    let dsize = new cv.Size(606, 460);
+                    cv.resize(img1, resizedImg, dsize, 0, 0, cv.INTER_LINEAR);      
+                    cv.resize(src, resizedSrc, dsize, 0, 0, cv.INTER_LINEAR);  
+                    cv.addWeighted(resizedImg,0.3, resizedSrc,0.8,0.5, combine);
+                    cv.imshow('canvas_output5', combine);
+                    document.getElementById("button-click").onclick=function()
+                    {
+                        
+                        let quality = 1;
+                         // Get the data URL with the specified quality
+                        let dataUrl = canvas5.toDataURL('image/jpeg', quality);
+
+                        // Create a link and trigger a download
+                        let a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download='opencv.jpeg';
+                        a.click();
+                    };
+                    let delay=1000/FPS-(Date.now()-begin);
+                    setTimeout(processVideo4,delay);
+                }
+                setTimeout(processVideo4,0); 
+                };    
+            
+
+            };
+        }
+
+    </script>
+</body>
+</html>
+
